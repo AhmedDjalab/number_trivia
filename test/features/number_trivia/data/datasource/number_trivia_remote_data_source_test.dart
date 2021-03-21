@@ -76,4 +76,51 @@ void main() {
       },
     );
   });
+
+  group("getRandomNumberTrivia", () {
+    final tNumber = 1;
+    final tNumberTriviaModel =
+        NumberTriviaModel.fromJson(json.decode(fixture('trivia.json')));
+
+    test(
+      '''should perfom a Get request on a URL 
+        with number being the endpoint  and 
+        application/json header''',
+      () async {
+        // arrange
+        setUpMockHttpClientSuccess200();
+
+        // act
+        dataSource.getRandomNumberTrivia();
+        // assert
+        verify(mockHttpClient.get('http://numbersapi.com/random', headers: {
+          'Content-Type': 'application/json',
+        }));
+      },
+    );
+
+    test(
+      '''should return a NumberTriviaModel when the responce code is 200 ''',
+      () async {
+        // arrange
+        setUpMockHttpClientSuccess200();
+        // act
+        final result = await dataSource.getRandomNumberTrivia();
+        // assert
+        expect(result, equals(tNumberTriviaModel));
+      },
+    );
+
+    test(
+      '''should throw ServerException when the responce is 404 or other''',
+      () async {
+        // arrange
+        setUpMockHttpClientFailed404();
+        // act
+        final call = dataSource.getRandomNumberTrivia;
+        // assert
+        expect(() => call(), throwsA(isA<ServerExceptions>()));
+      },
+    );
+  });
 }
